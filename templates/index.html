@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Recognition and Text-to-Speech</title>
+</head>
+<body>
+    <h1>Speech Recognition and Text-to-Speech</h1>
+    <form id="speechForm">
+        <label for="audio">Upload an audio file:</label>
+        <input type="file" name="audio" accept="audio/*" required>
+        <button type="button" onclick="recognizeSpeech()">Recognize Speech</button>
+    </form>
+    <div id="result"></div>
+
+    <hr>
+
+    <label for="textInput">Enter text for Text-to-Speech:</label>
+    <textarea id="textInput" rows="4" cols="50"></textarea>
+    <button type="button" onclick="textToSpeech()">Convert to Speech</button>
+    <audio controls id="audioPlayer"></audio>
+
+    <script>
+        async function recognizeSpeech() {
+            const form = document.getElementById('speechForm');
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/recognize_speech', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                document.getElementById('result').innerText = `Recognized Text: ${result.text}`;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function textToSpeech() {
+            const textInput = document.getElementById('textInput').value;
+
+            try {
+                const response = await fetch('/text_to_speech', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: textInput }),
+                });
+
+                const result = await response.json();
+                document.getElementById('audioPlayer').src = result.path;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
